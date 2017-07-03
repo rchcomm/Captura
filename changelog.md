@@ -4,6 +4,30 @@ title: Feature Changelog
 permalink: Changelog/
 ---
 
+## v4.2.0
+- **fix:** Fix thread exceptions when showing MessageBox.
+- **fix:** NullReferenceException happening with Notifications.
+- **fix:** High CPU usage in Recording and Paused states.
+- Option to **Customize Clicks and Keystrokes overlay**.
+- Better default style for the Clicks and Keystrokes overlay.
+- Added Window capture Background Color.
+- Added Opus support for FFMpeg audio alone capture.
+- Improved Folder Browser Dialog (Contributed by [@armujahid](https://github.com/armujahid)).
+- Added a circle around the Cursor, Clicks and Keys toggle options to improve accessibility.
+- Gif Variable Frame Rate setting defaults to True.
+- Added FFMpeg Logging. Openable from About tab.
+- Resize/Rotate/Flip transforms now only for ScreenShots.
+
+#### Extras
+A new window openable from About tab for additional settings:
+- Accent Color
+- Top Bar Color
+- Setting Region Border Thickness
+- Setting ScreenShot Notification Timeout
+- Selecting Video Background Color
+- Copying output file to Clipboard
+- Making Main Window always to Top
+
 ## v4.1.0
 - **fix:** Region Selector on High DPI.
 - **fix:** Selected Video Writer Kind null if FFMpeg folder is removed when currently selected as Video Writer Kind.
