@@ -4,6 +4,10 @@ title: Feature Changelog
 permalink: Changelog/
 ---
 
+## v4.2.1
+**Fix**: Crash when Snap to Window is clicked without dragging.
+It now Snaps to the window below.
+
 ## v4.2.0
 - **fix:** Fix thread exceptions when showing MessageBox.
 - **fix:** NullReferenceException happening with Notifications.
