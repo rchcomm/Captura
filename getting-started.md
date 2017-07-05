@@ -13,9 +13,9 @@ reading_time: true
 - Captura can work even if any or all of these libraries are missing: SharpAvi, FFmpeg, MouseKeyHook, ManagedBass.
 
 ## Want to build yourself?
-- [Visual Studio 2017](https://visualstudio.com) or greater is recommended. Can also be build using Visual Studio 2015 using [Microsoft.Net.Compilers](https://www.nuget.org/packages/Microsoft.Net.Compilers) nuget package to support compilation of C# 7.
+- [Visual Studio 2017](https://visualstudio.com) or greater is recommended. Can also be built using Visual Studio 2015 using [Microsoft.Net.Compilers](https://www.nuget.org/packages/Microsoft.Net.Compilers) nuget package to support compilation of C# 7.
 - .Net Framework v4.6.1 is required.
-- **Clone submodules:** Open a terminal in the project folder and type `git submodule update --init`.
+- ~~**Clone submodules:** Open a terminal in the project folder and type `git submodule update --init`.~~
 - Restore NuGet packages.
 
 ### Dependencies as Submodules
