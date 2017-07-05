@@ -18,9 +18,6 @@ reading_time: true
 - ~~**Clone submodules:** Open a terminal in the project folder and type `git submodule update --init`.~~
 - Restore NuGet packages.
 
-### Dependencies as Submodules
-- [Screna](https://github.com/MathewSachin/Screna)
-
 ### Dependencies installed from NuGet.
 - SharpAvi
 - MouseKeyHook
