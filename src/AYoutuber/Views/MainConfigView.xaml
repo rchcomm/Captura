@@ -173,7 +173,7 @@
             </StackPanel>
         </GroupBox>
         
-        <GroupBox Header="{local:Loc Audio}" Margin="10,10,0,0" IsEnabled="False">
+        <GroupBox Header="{local:Loc Audio}" Margin="10,10,0,0">
             <StackPanel>
                 
 
