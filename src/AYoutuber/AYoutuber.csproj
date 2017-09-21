@@ -127,6 +127,7 @@
     <Compile Include="Presentation\Controls\ModernToggleButton.cs" />
     <Compile Include="Presentation\Controls\ModernButton.cs" />
     <Compile Include="Models\RegionItem.cs" />
+    <Compile Include="Presentation\ValueConverters\MediaTypeToIntervalButtonVisibilityConverter.cs" />
     <Compile Include="Presentation\ValueConverters\MediaTypeToPlayButtonVisibilityConverter.cs" />
     <Compile Include="ViewModels\ManageSessionViewModel.cs" />
     <Compile Include="ViewModels\TimelineViewModel.cs" />

@@ -17,6 +17,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <local:MediaTypeToPlayButtonVisibilityConverter x:Key="MediaTypeToPlayButtonVisibilityConverter" />
+            <local:MediaTypeToIntervalButtonVisibilityConverter x:Key="MediaTypeToIntervalButtonVisibilityConverter" />
             <local:StateToPauseButtonAngleConverter x:Key="StateToPauseButtonAngleConverter"/>
             <local:StateToRecordButtonGeometryConverter x:Key="StateToRecordButtonGeometryConverter"/>
             <local:StateToTaskbarOverlayConverter x:Key="StateToTaskbarOverlayConverter"/>

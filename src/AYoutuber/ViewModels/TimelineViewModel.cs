@@ -38,13 +38,12 @@ namespace Captura
 
         public string ResultPath { get; set; }
 
-        public string PreviewVideoFileName { get; set; } = "Result.mp4";
-
-        public string PreviewSubtitleFileName { get; set; } = "Result-{0}.smi";
-
         public ObservableCollection<MediaItem> MediaCollection { get; set; } = new ObservableCollection<MediaItem>();
 
         public string ApplicationBaseDirectory { get; set; }
+
+        public string OutVideoFileName { get; set; } = "Result.mp4";
+        public string OutVideoSubTitleFileName { get; set; }
         #endregion
 
         #region Commands
@@ -52,6 +51,8 @@ namespace Captura
         /// 미리보기 Command
         /// </summary>
         public DelegateCommand MakePreviewVideoCommand { get; set; }
+
+        public DelegateCommand EditSubtitleCommand { get; set; }
 
         public DelegateCommand NextCommand { get; set; }
 
@@ -79,6 +80,7 @@ namespace Captura
             this.OutRelativePath = "";
 
             this.ResultPath = Path.Combine(outPath, "Result");
+            this.OutVideoSubTitleFileName = Path.Combine(this.ResultPath, "Result.srt");
 
             if (!Directory.Exists(this.ResultPath))
             {
@@ -120,9 +122,8 @@ namespace Captura
             this.MakePreviewVideoCommand = new DelegateCommand(() => {
                 var imageSequenceFileName = Path.Combine(this.OutPath, "Temp", "imageSequence.txt");
                 var imageSequenceFileNameArg = this.GetWorkRelativePath() + "Temp/" + "imageSequence.txt";
-                var outVideoFileName = "Result.mp4";
-                var outVideoFilePath = Path.Combine(this.ResultPath, outVideoFileName);
-                var outVideoFilePathArg = this.GetWorkRelativePath() + "Result/" + outVideoFileName;
+                var outVideoFilePath = Path.Combine(this.ResultPath, this.OutVideoFileName);
+                var outVideoFilePathArg = this.GetWorkRelativePath() + "Result/" + this.OutVideoFileName;
                 var bgmNameArg = "../Bgm/" + "Awakening.mp3"; //../BGM/Silver.mp3
 
                 if (File.Exists(imageSequenceFileName))
@@ -135,13 +136,19 @@ namespace Captura
                     File.Delete(outVideoFilePath);
                 }
 
-                var outTempVideoFiles = this.ConvertImageToVideoGenerate(this.MediaCollection);
-
-                if (Directory.Exists(this.ResultPath))
+                // 자막 파일 존재 여부 체크
+                if (!File.Exists(this.OutVideoSubTitleFileName))
                 {
-                    Directory.Delete(this.ResultPath, true);
+                    // 빈 자막 파일을 만든다.
+                    using (var sw = File.CreateText(this.OutVideoSubTitleFileName))
+                    {
+                        sw.WriteLine("1");
+                        sw.WriteLine("00:00:00,000 --> 00:00:01,000");
+                    }
                 }
-                Directory.CreateDirectory(this.ResultPath);
+
+                var tempOutPath = Path.Combine(this.OutPath, "Temp");
+                var outTempVideoFiles = this.ConvertImageToVideoGenerate(this.MediaCollection, tempOutPath);
 
                 FileInfo fileInfo = new FileInfo(imageSequenceFileName);
                 using (var sw = fileInfo.CreateText())
@@ -154,6 +161,42 @@ namespace Captura
                 }
 
                 VideoGenerate(imageSequenceFileNameArg, bgmNameArg, outVideoFilePathArg, outVideoFilePath, true);
+
+                Directory.Delete(tempOutPath, true);
+            });
+
+            this.EditSubtitleCommand = new DelegateCommand(() => {
+                ProcessStartInfo editStartInfo = new ProcessStartInfo();
+                var outVideoPath = Path.Combine(this.ResultPath, this.OutVideoFileName);
+                if (File.Exists(outVideoPath))
+                {
+                    var arguments = string.Format("{0} {1} {2}", Path.Combine(this.ResultPath, this.OutVideoSubTitleFileName), outVideoPath, "ko-KR");
+                    var workingDirectory = Path.Combine(this.ApplicationBaseDirectory);
+                    var processStartInfo = new ProcessStartInfo(Path.Combine(workingDirectory, "SubtitleEdit.exe"))
+                    {
+                        Arguments = arguments,
+                        WorkingDirectory = workingDirectory,
+                        WindowStyle = ProcessWindowStyle.Normal,
+                    };
+
+                    try
+                    {
+                        using (var process = new Process())
+                        {
+                            process.StartInfo = processStartInfo;
+                            process.Start();
+                            process.WaitForExit();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        var message = ex.Message;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("동영상 파일이 없습니다. \"Preview\" 버튼을 눌러서 확인해 주세요!");
+                }
             });
 
             this.NextCommand = new DelegateCommand(() => {
@@ -233,11 +276,10 @@ namespace Captura
             }
         }
 
-        public List<string> ConvertImageToVideoGenerate(IEnumerable<MediaItem> sources)
+        public List<string> ConvertImageToVideoGenerate(IEnumerable<MediaItem> sources, string tempOutPath)
         {
             var tempVideoFiles = new List<string>();
 
-            var tempOutPath = Path.Combine(this.OutPath, "Temp");
             if (Directory.Exists(tempOutPath))
             {
                 Directory.Delete(tempOutPath, true);
@@ -261,18 +303,19 @@ namespace Captura
                         break;
                     case MediaType.Image:
                         var sequenceFilePath = Path.Combine(this.OutPath, imageSequenceFileName);
-                        if(File.Exists(sequenceFilePath)) File.Delete(sequenceFilePath);
+                        if (File.Exists(sequenceFilePath)) File.Delete(sequenceFilePath);
                         FileInfo fileInfo = new FileInfo(sequenceFilePath);
                         using (var sw = fileInfo.CreateText())
                         {
-                            for(int i = 0; i <= source.Interval; i++)
+                            for (int i = 0; i <= source.Interval; i++)
                             {
                                 sw.WriteLine("file '" + Path.GetFileName(source.FileName) + "'");
                                 sw.WriteLine("duration 1");
-                            }                         
+                            }
                         }
 
                         VideoGenerate(imageSequenceFileNameArg, null, outVideoFilePathArg, outVideoFilePath, false);
+                        fileInfo.Delete();
                         break;
                     case MediaType.Video:
                         var inputVideoFilePathArg = this.GetWorkRelativePath() + source.FileName;
@@ -291,14 +334,14 @@ namespace Captura
         public void SetSacleWidthHeight(string selectedSacleSizeString)
         {
             var dimension = selectedSacleSizeString.Split('_');
-            if(dimension.Length == 3)
+            if (dimension.Length == 3)
             {
                 this.ScaleWidth = int.Parse(dimension[1]);
                 this.ScaleHeight = int.Parse(dimension[2]);
             }
         }
 
-        public ObservableCollection<string> MediaTargetSizes { get; set; }        
+        public ObservableCollection<string> MediaTargetSizes { get; set; }
 
         public string MediaTargetSizeSelectedItem { get; set; } = "YOUTUBE_940_530";
 

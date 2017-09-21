@@ -77,8 +77,8 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBox Text="{Binding Interval, Mode=TwoWay }" Width="100" />
-                                <xctk:IntegerUpDown Value="{Binding Interval, Mode=TwoWay}" Width="100" Increment="1" Maximum="60" Minimum="1" />
+                                <TextBox Text="{Binding Interval, Mode=TwoWay }" Width="100" Visibility="{Binding MediaType, Converter={StaticResource MediaTypeToIntervalButtonVisibilityConverter}}" />
+                                <xctk:IntegerUpDown Value="{Binding Interval, Mode=TwoWay}" Width="100" Increment="1" Maximum="180" Minimum="1" Visibility="{Binding MediaType, Converter={StaticResource MediaTypeToIntervalButtonVisibilityConverter}}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -88,6 +88,7 @@
         </DataGrid>
         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,5,0" Grid.Row="3" VerticalAlignment="Top">
             <Button Content="Preview" Command="{Binding MakePreviewVideoCommand}" />
+            <Button Content="Edit Subtitle" Margin="10,0,0,0" Command="{Binding EditSubtitleCommand}" />
             <Button Content="Next" Margin="10,0,0,0" Command="{Binding NextCommand}" />
         </StackPanel>
 
