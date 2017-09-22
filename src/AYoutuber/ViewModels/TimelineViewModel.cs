@@ -103,7 +103,11 @@ namespace Captura
                             break;
                         case ".mp4":
                             fileIndex++;
-                            this.MediaCollection.Add(new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Video, Order = fileIndex, Interval = 5 });
+                            this.MediaCollection.Add(new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Video, Order = fileIndex });
+                            break;
+                        case ".avi":
+                            fileIndex++;
+                            this.MediaCollection.Add(new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Video, Order = fileIndex });
                             break;
                     }
                 }
@@ -144,6 +148,28 @@ namespace Captura
                     {
                         sw.WriteLine("1");
                         sw.WriteLine("00:00:00,000 --> 00:00:01,000");
+                        //                        sw.WriteLine(@"<SAMI>
+                        //<HEAD>
+                        //<TITLE>Result</TITLE>
+                        //<SAMIParam>
+                        //  Metrics {time:ms;}
+                        //  Spec {MSFT:1.0;}
+                        //</SAMIParam>");
+                        //                        sw.WriteLine("<STYLE TYPE=\"text / css\">");
+                        //                        sw.WriteLine(@"
+                        //<!--
+                        //  P { font-family: Arial; font-weight: normal; color: white; background-color: black; text-align: center; }
+                        //  .ENUSCC { name: English; lang: en-US ; SAMIType: CC ; }
+                        //-->
+                        //</STYLE>
+                        //</HEAD>
+                        //<BODY>
+                        //<-- Open play menu, choose Captions and Subtiles, On if available -->
+                        //<-- Open tools menu, Security, Show local captions when present -->");
+                        //                        sw.WriteLine("<SYNC Start=\"0\"><P Class=\"ENUSCC\"> 자막 </P></SYNC>");
+                        //                        sw.WriteLine("<SYNC Start=\"1000\"><P Class=\"ENUSCC\"></P></SYNC>");
+                        //                        sw.WriteLine(@"</BODY>
+                        //</SAMI>");
                     }
                 }
 
@@ -172,7 +198,7 @@ namespace Captura
                 {
                     var arguments = string.Format("{0} {1} {2}", Path.Combine(this.ResultPath, this.OutVideoSubTitleFileName), outVideoPath, "ko-KR");
                     var workingDirectory = Path.Combine(this.ApplicationBaseDirectory);
-                    var processStartInfo = new ProcessStartInfo(Path.Combine(workingDirectory, "SubtitleEdit.exe"))
+                    var processStartInfo = new ProcessStartInfo(Path.Combine(workingDirectory, "SubtitleEdit", "SubtitleEdit.exe"))
                     {
                         Arguments = arguments,
                         WorkingDirectory = workingDirectory,
