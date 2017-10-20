@@ -8,3 +8,5 @@ Output/
 *.suo
 *.user
 *.nupkg
+debug/
+release/

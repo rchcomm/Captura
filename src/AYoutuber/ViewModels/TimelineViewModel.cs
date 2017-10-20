@@ -288,12 +288,20 @@ namespace Captura
                     WorkingDirectory = workingDirectory,
                     CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    //ErrorDialog = true,
+                    //RedirectStandardError = true,
+                    //RedirectStandardOutput = true
                 };
 
                 try
                 {
-                    var process = Process.Start(processStartInfo);
+                    using (var process = new Process())
+                    {
+                        process.StartInfo = processStartInfo;
+                        process.Start();
+                        //process.WaitForExit();
+                    }
                 }
                 catch (Exception ex)
                 {
