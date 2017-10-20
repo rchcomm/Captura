@@ -64,8 +64,10 @@
       <HintPath>..\packages\Hardcodet.NotifyIcon.Wpf.1.0.8\lib\net451\Hardcodet.Wpf.TaskbarNotification.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
@@ -117,6 +119,12 @@
     <Compile Include="Models\SortableObservableCollection.cs" />
     <Compile Include="Models\SystemTray.cs" />
     <Compile Include="Models\WebCamProvider.cs" />
+    <Compile Include="Modules\LavFiltersInstallerExecuter.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Modules\LavFiltersInstallerExecuter.Designer.cs">
+      <DependentUpon>LavFiltersInstallerExecuter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Presentation\Controls\TextBalloon.xaml.cs">
       <DependentUpon>TextBalloon.xaml</DependentUpon>
     </Compile>
