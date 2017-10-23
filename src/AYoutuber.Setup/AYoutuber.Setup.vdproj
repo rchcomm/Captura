@@ -4,9 +4,9 @@
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
 "ProjectName" = "8:AYoutuber.Setup"
-"LanguageId" = "3:1042"
-"CodePage" = "3:949"
-"UILanguageId" = "3:1042"
+"LanguageId" = "3:1033"
+"CodePage" = "3:1252"
+"UILanguageId" = "3:1033"
 "SccProjectName" = "8:"
 "SccLocalPath" = "8:"
 "SccAuxPath" = "8:"
@@ -3381,7 +3381,7 @@
         {
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_43D0FD5A312B444C932981AA09E4F04A"
             {
-            "DefaultLocation" = "8:C:\\[Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[CommonAppDataFolder][Manufacturer]\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -3433,7 +3433,7 @@
         }
         "MsiBootstrapper"
         {
-        "LangId" = "3:1042"
+        "LangId" = "3:1033"
         "RequiresElevation" = "11:FALSE"
         }
         "Product"
@@ -3441,7 +3441,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AYoutuber"
         "ProductCode" = "8:{50EC60DD-9C7D-4156-8100-ADEDC3B4971E}"
-        "PackageCode" = "8:{8433B164-6D6F-40CE-9561-B312325965FC}"
+        "PackageCode" = "8:{838BEB1B-C96F-4432-90CF-A5D0D2A4453E}"
         "UpgradeCode" = "8:{0B65F80A-D55F-4103-BE11-B7E50A18C43E}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -3449,7 +3449,7 @@
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:AYoutuber"
+        "Manufacturer" = "8:Vista"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:AYoutuber title"
