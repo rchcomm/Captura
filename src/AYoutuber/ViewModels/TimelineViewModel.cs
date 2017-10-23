@@ -221,7 +221,7 @@ namespace Captura
                 }
                 else
                 {
-                    MessageBox.Show("동영상 파일이 없습니다. \"Preview\" 버튼을 눌러서 확인해 주세요!");
+                    MessageBox.Show("동영상 파일이 없습니다. \"Generate\" 버튼을 눌러서 확인해 주세요!");
                 }
             });
 
