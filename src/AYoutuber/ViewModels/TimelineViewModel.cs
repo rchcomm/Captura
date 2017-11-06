@@ -1,4 +1,5 @@
-﻿using Captura.Models;
+﻿using AYoutuber.Models;
+using Captura.Models;
 using Captura.Models.VideoItems;
 using Captura.ViewModels;
 using FirstFloor.ModernUI.Windows.Controls;
@@ -9,20 +10,75 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using GongSolutions.Wpf.DragDrop;
+using AYoutuber;
+using Newtonsoft.Json;
 
 namespace Captura
 {
     public class TimelineViewModel : ViewModelBase
     {
         #region Properties
+        [JsonIgnore]
         public int ScaleWidth { get; set; } = 940;
-        public int ScaleHeight { get; set; } = 530;
 
-        public Window OwnerWindow { get; set; }
+        [JsonIgnore]
+        public int ScaleHeight { get; set; } = 530;
+        public int LastestFileIndex { get; set; } = 0;
+
+        [JsonIgnore]
+        public ObservableCollection<string> MediaTargetSizes { get; set; }
+
+        private string mediaTargetSizeSelectedItem;
+        public string MediaTargetSizeSelectedItem
+        {
+            get
+            {
+                return this.mediaTargetSizeSelectedItem;
+            }
+
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    SetSacleWidthHeight(value);
+                    this.mediaTargetSizeSelectedItem = value;
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// 배경음악 리스트
+        /// </summary>
+        [JsonIgnore]
+        public ObservableCollection<string> BGMPlayFileList { get; set; }
+
+        public string BGMPlayFileListSelectedItem { get; set; } = "Big_Wheel.mp3";
+
+        [JsonIgnore]
+        public FileDragDropHandler FileDragDropHandler { get; set; }
+
+        private bool isPlaying;
+
+        [JsonIgnore]
+        public bool IsPlaying
+        {
+            get { return isPlaying; }
+            set
+            {
+                isPlaying = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        //[JsonIgnore]
+        //public Window OwnerWindow { get; set; }
 
         /// <summary>
         /// 현재 작업 번호
@@ -38,9 +94,13 @@ namespace Captura
 
         public string ResultPath { get; set; }
 
+        public string RemovePath { get; private set; } = string.Empty;
+
         public ObservableCollection<MediaItem> MediaCollection { get; set; } = new ObservableCollection<MediaItem>();
 
         public string ApplicationBaseDirectory { get; set; }
+
+        public string BGMDirectory { get; set; }
 
         public string OutVideoFileName { get; set; } = "Result.mp4";
         public string OutVideoSubTitleFileName { get; set; }
@@ -50,14 +110,55 @@ namespace Captura
         /// <summary>
         /// 미리보기 Command
         /// </summary>
-        public DelegateCommand MakePreviewVideoCommand { get; set; }
+        [JsonIgnore]
+        public DelegateCommand GenerateVideoCommand { get; set; }
 
+        [JsonIgnore]
+        public DelegateCommand BGMPlayStartCommand { get; set; }
+
+        [JsonIgnore]
+        public DelegateCommand BGMPlayStopCommand { get; set; }
+
+        [JsonIgnore]
+        public DelegateCommand FileRemoveCommand { get; set; }
+
+        /// <summary>
+        /// 동영상 잘라내기 Command
+        /// </summary>
+        [JsonIgnore]
+        public DelegateCommand MovieSliceAcceptCommand { get; set; }
+
+        [JsonIgnore]
+        public DelegateCommand UnLoadedCommand { get; set; }
+
+        /// <summary>
+        /// 파일 드롭
+        /// </summary>
+        [JsonIgnore]
+        public ActionCommand<DragEventArgs> DropFilesCommand { get; set; }
+
+        /// <summary>
+        /// 자막 프로그램 띄우기 Command
+        /// </summary>
+        [JsonIgnore]
         public DelegateCommand EditSubtitleCommand { get; set; }
 
+        /// <summary>
+        /// 다음  Command
+        /// </summary>
+        [JsonIgnore]
         public DelegateCommand NextCommand { get; set; }
 
+        /// <summary>
+        /// 부분 동영상 플레이 하기 Command
+        /// </summary>
+        [JsonIgnore]
         public DelegateCommand PlayMediaCommand { get; set; }
 
+        /// <summary>
+        ///  Command
+        /// </summary>
+        [JsonIgnore]
         public DelegateCommand StopMediaCommand { get; set; }
         #endregion
 
@@ -75,11 +176,14 @@ namespace Captura
         public void Initialization(int workNumber, string outPath)
         {
             this.WorkNumber = workNumber;
+            this.MediaTargetSizeSelectedItem = "YOUTUBE_940_530";
             this.OutPath = outPath;
             this.ApplicationBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            this.BGMDirectory = Path.Combine(this.ApplicationBaseDirectory, "BGM");
             this.OutRelativePath = "";
 
             this.ResultPath = Path.Combine(outPath, "Result");
+            this.RemovePath = Path.Combine(outPath, "Removed");
             this.OutVideoSubTitleFileName = Path.Combine(this.ResultPath, "Result.srt");
 
             if (!Directory.Exists(this.ResultPath))
@@ -87,48 +191,26 @@ namespace Captura
                 Directory.CreateDirectory(this.ResultPath);
             }
 
+            this.FileDragDropHandler = new FileDragDropHandler(this);
+
             //if(System.ComponentModel.DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
-                int fileIndex = 0;
                 foreach (var filePath in Directory.GetFiles(outPath))
                 {
-                    var fileInfo = new FileInfo(filePath);
-
-                    switch (fileInfo.Extension.ToLower())
-                    {
-                        case ".png":
-                        case ".gif":
-                            fileIndex++;
-                            this.MediaCollection.Add(new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Image, Order = fileIndex, Interval = 5 });
-                            break;
-                        case ".mp4":
-                            fileIndex++;
-                            this.MediaCollection.Add(new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Video, Order = fileIndex });
-                            break;
-                        case ".avi":
-                            fileIndex++;
-                            this.MediaCollection.Add(new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Video, Order = fileIndex });
-                            break;
-                    }
+                    this.AddMediaCollection(filePath, ++this.LastestFileIndex);
                 }
             }
 
-            this.PlayMediaCommand = new DelegateCommand((obj) => {
-                var mediaElement = obj as MediaElement;
-                if (mediaElement != null)
-                {
-
-                }
-            });
-
             this.MediaTargetSizes = new ObservableCollection<string>(Enum.GetNames(typeof(RegionSize)));
 
-            this.MakePreviewVideoCommand = new DelegateCommand(() => {
+            this.BGMPlayFileList = new ObservableCollection<string>(Directory.GetFiles(this.BGMDirectory, "*.mp3", SearchOption.AllDirectories).Select(str => Path.GetFileName(str)));
+
+            this.GenerateVideoCommand = new DelegateCommand(() => {
                 var imageSequenceFileName = Path.Combine(this.OutPath, "Temp", "imageSequence.txt");
                 var imageSequenceFileNameArg = this.GetWorkRelativePath() + "Temp/" + "imageSequence.txt";
                 var outVideoFilePath = Path.Combine(this.ResultPath, this.OutVideoFileName);
                 var outVideoFilePathArg = this.GetWorkRelativePath() + "Result/" + this.OutVideoFileName;
-                var bgmNameArg = "../Bgm/" + "Awakening.mp3"; //../BGM/Silver.mp3
+                var bgmNameArg = "../Bgm/" + this.BGMPlayFileListSelectedItem; //../BGM/Silver.mp3
 
                 if (File.Exists(imageSequenceFileName))
                 {
@@ -191,6 +273,70 @@ namespace Captura
                 Directory.Delete(tempOutPath, true);
             });
 
+            this.PlayMediaCommand = new DelegateCommand((obj) => {
+                MessageBox.Show("play");
+                var mediaElement = obj as MediaElement;
+                if (mediaElement != null)
+                {
+
+                }
+            });
+
+            this.MovieSliceAcceptCommand = new DelegateCommand(item =>
+            {
+                MessageBox.Show("slice");
+            });
+
+            this.UnLoadedCommand = new DelegateCommand(e => {
+                this.SaveGenerateInfo();
+            });
+
+            this.DropFilesCommand = new ActionCommand<DragEventArgs>(e => {
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    string[] filePaths = (string[])e.Data.GetData(DataFormats.FileDrop);
+                    foreach (var filePath in filePaths)
+                    {
+                        // file copy 
+                        var fileName = DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss") + Path.GetExtension(filePath);
+                        var addedFilePath = Path.Combine(this.OutPath, fileName);
+                        File.Copy(filePath, addedFilePath);
+
+                        this.AddMediaCollection(addedFilePath, ++this.LastestFileIndex);
+                        Thread.Sleep(1000);
+                    }
+                }
+
+                this.SaveGenerateInfo();
+            });
+
+            this.BGMPlayStartCommand = new DelegateCommand(() => {
+                if (!this.IsPlaying)
+                {
+                    this.IsPlaying = true;
+
+                    //before exit
+                    this.IsPlaying = false;
+                }
+            });
+
+            this.BGMPlayStopCommand = new DelegateCommand(() => {
+
+
+                this.IsPlaying = false;
+            });
+
+            this.FileRemoveCommand = new DelegateCommand(item => {
+                var removeItem = item as MediaItem;
+                if (removeItem != null)
+                {
+                    if (!Directory.Exists(this.RemovePath)) Directory.CreateDirectory(this.RemovePath);
+                    File.Move(removeItem.MediaSource, Path.Combine(this.RemovePath, Path.GetFileName(removeItem.MediaSource)));
+
+                    this.MediaCollection.Remove(removeItem);
+                }
+            });
+
             this.EditSubtitleCommand = new DelegateCommand(() => {
                 ProcessStartInfo editStartInfo = new ProcessStartInfo();
                 var outVideoPath = Path.Combine(this.ResultPath, this.OutVideoFileName);
@@ -226,7 +372,7 @@ namespace Captura
             });
 
             this.NextCommand = new DelegateCommand(() => {
-                ModernDialog.ShowMessage("NextCommand", "title", MessageBoxButton.OK, this.OwnerWindow);
+                ModernDialog.ShowMessage("NextCommand", "title", MessageBoxButton.OK);
             });
         }
 
@@ -250,8 +396,39 @@ namespace Captura
             }
 
             this.SetSacleWidthHeight(this.MediaTargetSizeSelectedItem);
-            var argument = string.Format(" -f concat -i {0} {1} -r 30 -pix_fmt yuv420p -vf scale={3}:{4} -c:a copy -shortest -vsync vfr {2}", imageSequenceFileNameArg, bgmNameArg, outVideoFilePathArg, this.ScaleWidth, this.ScaleHeight);
+            var argument = string.Format(" -f concat -i {0} {1} -r 30 -pix_fmt yuv420p -vf scale={3}:{4} -c:a copy -longest -vsync vfr {2}", imageSequenceFileNameArg, bgmNameArg, outVideoFilePathArg, this.ScaleWidth, this.ScaleHeight);
             this.VideoGenerateExecute(argument, isPlay, outVideoFilePath);
+        }
+
+        public void AddMediaCollection(string filePath, int fileIndex, int insertIndex = -1)
+        {
+            var fileInfo = new FileInfo(filePath);
+            MediaItem mediaItem = null;
+
+            switch (fileInfo.Extension.ToLower())
+            {
+                case ".png":
+                case ".gif":
+                    mediaItem = new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Image, Order = fileIndex, Interval = 5 };
+                    break;
+                case ".mp4":
+                    mediaItem = new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Video, Order = fileIndex };
+                    break;
+                case ".avi":
+                    mediaItem = new MediaItem(this) { FileName = fileInfo.Name, Id = fileIndex, MediaType = MediaType.Video, Order = fileIndex };
+                    break;
+            }
+
+            if (mediaItem != null) {
+                if(insertIndex == -1)
+                {
+                    this.MediaCollection.Add(mediaItem);
+                }
+                else
+                {
+                    this.MediaCollection.Insert(insertIndex, mediaItem);
+                }                
+            }
         }
 
         private void VideoGenerateExecute(string arguments, bool isPlay = false, string outVideoFilePath = null)
@@ -375,13 +552,37 @@ namespace Captura
             }
         }
 
-        public ObservableCollection<string> MediaTargetSizes { get; set; }
-
-        public string MediaTargetSizeSelectedItem { get; set; } = "YOUTUBE_940_530";
-
         public string GetWorkRelativePath()
         {
             return "../Works/Work_" + Environment.UserName + "_" + this.WorkNumber.ToString().PadLeft(4, '0') + "/";
+        }
+
+        /// <summary>
+        /// 구성 정보 저장
+        /// </summary>
+        /// <returns></returns>
+        public bool SaveGenerateInfo()
+        {
+            bool returnValue = false;
+
+            JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings();
+            jsonSerializerSettings.Formatting = Formatting.Indented;
+
+            try
+            {
+                var serializeString = Newtonsoft.Json.JsonConvert.SerializeObject(this, jsonSerializerSettings);
+                using (var sw = File.CreateText(Path.Combine(this.OutPath, "settings.json")))
+                {
+                    sw.Write(serializeString);
+                    sw.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+            }
+
+            return returnValue;
         }
     }
 }

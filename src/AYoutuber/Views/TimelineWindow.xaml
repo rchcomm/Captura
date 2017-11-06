@@ -4,9 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Captura"
+        xmlns:beh="clr-namespace:AYoutuber.Behaviors"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
+        xmlns:dd="urn:gong-wpf-dragdrop"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         Title="TimelineWindow" Height="300" Width="600">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Unloaded" >
+            <i:InvokeCommandAction Command="{Binding UnLoadedCommand}"></i:InvokeCommandAction>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="5" />
@@ -23,8 +32,28 @@
         <StackPanel Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5" Orientation="Horizontal">
             <Label>Target Result Size :</Label>
             <ComboBox ItemsSource="{Binding MediaTargetSizes}" SelectedItem="{Binding MediaTargetSizeSelectedItem}" />
+            <Label>BGM</Label>
+            <ComboBox Margin="10,0,0,0" ItemsSource="{Binding BGMPlayFileList}" SelectedItem="{Binding BGMPlayFileListSelectedItem}" />
+            <Button Margin="10,0,0,0" Content="▶" Command="{Binding BGMPlayStartCommand}"></Button>
+            <Button Margin="10,0,0,0" Content="■" Command="{Binding BGMPlayStopCommand}" IsEnabled="{Binding IsPlaying, Mode=TwoWay}"></Button>
         </StackPanel>
-        <DataGrid Grid.Column="1" HorizontalAlignment="Left" Margin="0,0,0,0" Grid.Row="2" VerticalAlignment="Top" ItemsSource="{Binding MediaCollection}" AutoGenerateColumns="False">
+        <DataGrid x:Name="grid"  Grid.Column="1" HorizontalAlignment="Left" Margin="0,0,0,0" Grid.Row="2" VerticalAlignment="Top" ItemsSource="{Binding MediaCollection}" AutoGenerateColumns="False" AllowDrop="True"
+                  dd:DragDrop.DropScrollingMode="VerticalOnly" 
+                  dd:DragDrop.IsDragSource="True"
+                  dd:DragDrop.IsDropTarget="True"
+                  dd:DragDrop.UseDefaultEffectDataTemplate="True"
+                  dd:DragDrop.DropHandler="{Binding FileDragDropHandler}"
+                  >
+            <!--<i:Interaction.Behaviors>
+                <beh:EventToCommandBehavior Command="{Binding DropFilesCommand}" Event="Drop" PassArguments="True"></beh:EventToCommandBehavior>
+            </i:Interaction.Behaviors>-->
+            
+            <!--<i:Interaction.Triggers>
+                <i:EventTrigger EventName="Drop">
+                    <i:InvokeCommandAction Command="{Binding DropFilesCommand}" />
+                    
+                </i:EventTrigger>
+            </i:Interaction.Triggers>-->
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="70">
                     <DataGridTemplateColumn.Header>
@@ -52,13 +81,12 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Button Content="Play" Visibility="{Binding MediaType, Converter={StaticResource MediaTypeToPlayButtonVisibilityConverter}}" />
-                                <!--<Button Content="Stop" Margin="0,10,0,0" />-->
+                                <Button Content="Play" Visibility="{Binding MediaType, Converter={StaticResource MediaTypeToPlayButtonVisibilityConverter}}" Command="{Binding Path=DataContext.PlayMediaCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="80">
+                <DataGridTemplateColumn Width="80" Visibility="Collapsed">
                     <DataGridTemplateColumn.Header>
                         <TextBlock>Type</TextBlock>
                     </DataGridTemplateColumn.Header>
@@ -76,18 +104,52 @@
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBox Text="{Binding Interval, Mode=TwoWay }" Width="100" Visibility="{Binding MediaType, Converter={StaticResource MediaTypeToIntervalButtonVisibilityConverter}}" />
-                                <xctk:IntegerUpDown Value="{Binding Interval, Mode=TwoWay}" Width="100" Increment="1" Maximum="180" Minimum="1" Visibility="{Binding MediaType, Converter={StaticResource MediaTypeToIntervalButtonVisibilityConverter}}" />
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding MediaType, Converter={StaticResource MediaTypeToIntervalButtonVisibilityConverter}}">
+                                <xctk:IntegerUpDown Value="{Binding Interval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" Increment="1" Maximum="180" Minimum="1" />
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Notice" Width="*" />
+                <DataGridTemplateColumn Width="250">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock>Range</TextBlock>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Path=MediaType, Converter={StaticResource MediaTypeToPlayButtonVisibilityConverter}}">
+                                <xctk:TimeSpanUpDown Minimum="0" Maximum="{Binding Path=EndTime}" DefaultValue="{Binding Path=StartRange}" Value="{Binding Path=StartRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></xctk:TimeSpanUpDown>
+                                <TextBlock Text="~" />
+                                <xctk:TimeSpanUpDown  Minimum="0" Maximum="{Binding Path=EndTime}" DefaultValue="{Binding Path=EndTime}" Value="{Binding Path=EndRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></xctk:TimeSpanUpDown>
+                                <Button Content="Accept" Margin="10,0,0,0"  Command="{Binding Path=DataContext.MovieSliceAcceptCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding}"></Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Visibility="Collapsed">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock>Overlap</TextBlock>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsBGMOverlap, Mode=TwoWay}" Visibility="{Binding Path=MediaType, Converter={StaticResource MediaTypeToPlayButtonVisibilityConverter}}"></CheckBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Notice" Width="*"></DataGridTextColumn>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock>Delete</TextBlock>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="X" ToolTip="Remove" Command="{Binding Path=DataContext.FileRemoveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding}"></Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,5,0" Grid.Row="3" VerticalAlignment="Top">
-            <Button Content="Preview" Command="{Binding MakePreviewVideoCommand}" />
+            <Button Content="Generate" Command="{Binding GenerateVideoCommand}" />
             <Button Content="Edit Subtitle" Margin="10,0,0,0" Command="{Binding EditSubtitleCommand}" />
             <Button Content="Next" Margin="10,0,0,0" Command="{Binding NextCommand}" />
         </StackPanel>
