@@ -49,12 +49,12 @@
                            Text="{local:Loc Gif}"
                            FontWeight="Bold"/>
 
-                <CheckBox Margin="0,2"
+                <CheckBox Margin="0,2" IsEnabled="False"
                           Content="{local:Loc VarFrameRate}"
                           IsChecked="{Binding Settings.GifVariable, Mode=TwoWay}"/>
 
                 <DockPanel Margin="0,2">
-                    <CheckBox Content="{local:Loc Repeat}"
+                    <CheckBox Content="{local:Loc Repeat}" IsEnabled="False"
                               Margin="0,0,5,0"
                               DockPanel.Dock="Left"
                               IsChecked="{Binding Settings.GifRepeat, Mode=TwoWay}"/>
@@ -67,7 +67,7 @@
                            Text="{local:Loc ScreenShot}"
                            FontWeight="Bold"/>
 
-                <Grid Margin="0,5">
+                <Grid Margin="0,5" IsEnabled="False">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -100,7 +100,7 @@
                               Margin="0,5,0,0"/>
                 </Grid>
 
-                <Grid Margin="0,5">
+                <Grid Margin="0,5" IsEnabled="False">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -125,7 +125,7 @@
                                         IsEnabled="{Binding Settings.DoResize}"/>
                 </Grid>
 
-                <StackPanel Margin="0,5"
+                <StackPanel Margin="0,5" IsEnabled="False"
                             Orientation="Horizontal">
                     <CheckBox Content="{local:Loc FlipX}"
                               IsChecked="{Binding Settings.FlipHorizontal, Mode=TwoWay}"
@@ -136,7 +136,7 @@
                               IsChecked="{Binding Settings.FlipVertical, Mode=TwoWay}"/>
                 </StackPanel>
 
-                <DockPanel Margin="0,5">
+                <DockPanel Margin="0,5" IsEnabled="False">
                     <Label Content="{local:Loc Rotate}"
                            ContentStringFormat="{}{0}: "
                            VerticalContentAlignment="Center"/>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,12 +17,29 @@ namespace Captura.ViewModels
         /// <summary>
         /// New Work Command
         /// </summary>
-        public DelegateCommand NewWorkCommand { get; set; }
+        public DelegateCommand NewWorkNumberCommand { get; set; }
 
         /// <summary>
         /// Edit Work Command
         /// </summary>
-        public DelegateCommand EditWorkCommand { get; set; }
+        public DelegateCommand EditWorkNumberCommand { get; set; }
+
+        public DelegateCommand WorkNumberSelectionChangedCommand { get; set; }
+
+        public ObservableCollection<int> WorkNumbers { get; set; }
+
+        private int selectedWorkNumber;
+
+        public int SelectedWorkNumber
+        {
+            get { return selectedWorkNumber; }
+            set
+            {
+                selectedWorkNumber = value;
+                this.OnPropertyChanged();
+            }
+        }
+
         #endregion
 
         public WorkViewModel(MainViewModel mainViewModel)

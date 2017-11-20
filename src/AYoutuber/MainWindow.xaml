@@ -260,7 +260,7 @@
                     <TabItem Header="{local:Loc Recent}" Visibility="Collapsed">
                         <Frame Source="Views/RecentView.xaml"/>
                     </TabItem>
-                    <TabItem Header="{local:Loc Hotkeys}" Visibility="Collapsed">
+                    <TabItem Header="{local:Loc Hotkeys}">
                         <Frame Source="Views/HotkeyView.xaml"/>
                     </TabItem>
                     <TabItem Header="{local:Loc About}" Visibility="Collapsed">

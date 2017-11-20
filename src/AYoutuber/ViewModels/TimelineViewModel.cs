@@ -18,6 +18,7 @@ using System.Windows.Input;
 using GongSolutions.Wpf.DragDrop;
 using AYoutuber;
 using Newtonsoft.Json;
+using System.Windows.Media;
 
 namespace Captura
 {
@@ -50,9 +51,10 @@ namespace Captura
                     this.mediaTargetSizeSelectedItem = value;
                 }
             }
-
         }
 
+        [JsonIgnore]
+        public MediaElement BgmMediaElement { get; set; } = new MediaElement();
         /// <summary>
         /// 배경음악 리스트
         /// </summary>
@@ -314,6 +316,17 @@ namespace Captura
                 if (!this.IsPlaying)
                 {
                     this.IsPlaying = true;
+                    var bgmUri = new Uri(Path.Combine(this.ApplicationBaseDirectory, this.BGMPlayFileListSelectedItem), uriKind: UriKind.Absolute);
+                    //this.BgmMediaElement.Source = bgmUri;
+                    //this.BgmMediaElement.LoadedBehavior = MediaState.Manual;
+                    //this.BgmMediaElement.Play();
+
+                    //MediaPlayer mediaPlayer = new MediaPlayer();
+                    //mediaPlayer.Open(bgmUri);
+
+                    //mediaPlayer.Play();
+
+                    Process.Start(Path.Combine(this.ApplicationBaseDirectory, this.BGMPlayFileListSelectedItem));
 
                     //before exit
                     this.IsPlaying = false;
@@ -396,7 +409,7 @@ namespace Captura
             }
 
             this.SetSacleWidthHeight(this.MediaTargetSizeSelectedItem);
-            var argument = string.Format(" -f concat -i {0} {1} -r 30 -pix_fmt yuv420p -vf scale={3}:{4} -c:a copy -longest -vsync vfr {2}", imageSequenceFileNameArg, bgmNameArg, outVideoFilePathArg, this.ScaleWidth, this.ScaleHeight);
+            var argument = string.Format(" -f concat -i {0} {1} -r 30 -pix_fmt yuv420p -vf scale={3}:{4} -c:a copy -shortest -vsync vfr {2}", imageSequenceFileNameArg, bgmNameArg, outVideoFilePathArg, this.ScaleWidth, this.ScaleHeight);
             this.VideoGenerateExecute(argument, isPlay, outVideoFilePath);
         }
 

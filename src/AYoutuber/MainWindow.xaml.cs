@@ -1,6 +1,8 @@
 ﻿using Captura.Models;
 using Captura.ViewModels;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -57,22 +59,38 @@ namespace Captura
             var mainViewModel = DataContext as MainViewModel;
             mainViewModel.Init(!App.CmdOptions.NoPersist, true, !App.CmdOptions.Reset, !App.CmdOptions.NoHotkeys);
 
-            mainViewModel.WorkViewModel.NewWorkCommand = new DelegateCommand(() => {
+            mainViewModel.WorkViewModel.NewWorkNumberCommand = new DelegateCommand(() => {
                 if (ServiceProvider.Messenger.ShowYesNo("New Work?", "New Work"))
                 {
                     Settings.Instance.LastWorkNumber++;
+                    Settings.Instance.CurrentWorkNumber = Settings.Instance.LastWorkNumber;
                 }
             });
 
-            mainViewModel.WorkViewModel.EditWorkCommand = new DelegateCommand(() => {
+            mainViewModel.WorkViewModel.EditWorkNumberCommand = new DelegateCommand(() => {
+                var selectedWorkNumber = mainViewModel.WorkViewModel.SelectedWorkNumber;
                 TimelineWindow timelineWindow = new TimelineWindow();
-                var viewModel = new TimelineViewModel(Settings.Instance.LastWorkNumber, Settings.Instance.OutPathWithWork());
+                var viewModel = new TimelineViewModel(selectedWorkNumber, Settings.Instance.OutPathWithWork(selectedWorkNumber));
                 //viewModel.OwnerWindow = timelineWindow;
                 timelineWindow.DataContext = viewModel;
                 timelineWindow.Height = 600;
                 timelineWindow.Width = 800;
                 timelineWindow.Show();
             });
+
+            mainViewModel.WorkViewModel.WorkNumberSelectionChangedCommand = new DelegateCommand(() => {
+                Settings.Instance.CurrentWorkNumber = mainViewModel.WorkViewModel.SelectedWorkNumber;
+            });
+
+            var workNumbers = new List<int>();
+            var directoies = Directory.GetDirectories(Settings.Instance.OutPath);
+            foreach (var directory in directoies)
+            {
+                workNumbers.Add(int.Parse(directory.Split(new[] { '_' })[2]));
+            }
+
+            mainViewModel.WorkViewModel.WorkNumbers = new ObservableCollection<int>(workNumbers);
+            mainViewModel.WorkViewModel.SelectedWorkNumber = Settings.Instance.LastWorkNumber;
         }
 
         protected override void OnStateChanged(EventArgs e)

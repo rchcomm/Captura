@@ -63,6 +63,14 @@ namespace Captura
         }
 
         [UserScopedSetting]
+        [DefaultSettingValue("1")]
+        public int CurrentWorkNumber
+        {
+            get => Get<int>();
+            set => Set(value);
+        }
+
+        [UserScopedSetting]
         public string LastMicName
         {
             get => Get<string>();

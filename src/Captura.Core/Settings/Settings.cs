@@ -79,9 +79,14 @@ namespace Captura
             set => Set(value);
         }
 
-        public string OutPathWithWork()
+        public string OutPathWithWork(int currentWorkNumber = 0)
         {
-            var str = Path.Combine(this.OutPath, "Work_" + Environment.UserName + "_" + this.LastWorkNumber.ToString().PadLeft(4, '0'));
+            if(currentWorkNumber == 0)
+            {
+                currentWorkNumber = Settings.Instance.CurrentWorkNumber;
+            }
+
+            var str = Path.Combine(this.OutPath, "Work_" + Environment.UserName + "_" + currentWorkNumber.ToString().PadLeft(4, '0'));
             if (!Directory.Exists(str))
             {
                 Directory.CreateDirectory(str);
