@@ -1,5 +1,6 @@
 ﻿using Captura.Models;
 using Captura.ViewModels;
+using Captura.Views.EffectWindows;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -57,6 +58,10 @@ namespace Captura
             };
 
             var mainViewModel = DataContext as MainViewModel;
+            mainViewModel.InsertEffectBlurCommand = new DelegateCommand(() => {
+                var window = new BlurEffectWindow();
+                window.Show();
+            });
             mainViewModel.Init(!App.CmdOptions.NoPersist, true, !App.CmdOptions.Reset, !App.CmdOptions.NoHotkeys);
 
             mainViewModel.WorkViewModel.NewWorkNumberCommand = new DelegateCommand(() => {

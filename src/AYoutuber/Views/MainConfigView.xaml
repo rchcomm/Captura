@@ -25,6 +25,9 @@
                 <local:ModernButton ToolTip="{local:Loc OpenOutFolder}"
                                     Command="{Binding OpenOutputFolderCommand}"
                                     IconData="{StaticResource Icon_Folder}"/>
+                <local:ModernButton ToolTip="{local:Loc OpenOutFolder}"
+                                    Command="{Binding InsertEffectBlurCommand}"
+                                    IconData="{StaticResource Icon_BlurEffect}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal"
                         IsEnabled="{Binding RecorderState, Converter={StaticResource NotRecordingConverter}}"

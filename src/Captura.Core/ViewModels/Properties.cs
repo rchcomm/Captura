@@ -160,6 +160,8 @@ namespace Captura.ViewModels
             Process.Start(Settings.Instance.OutPathWithWork());
         });
 
+        public DelegateCommand InsertEffectBlurCommand { get; set; }
+
         public DelegateCommand PauseCommand { get; }
 
         public DelegateCommand SelectOutputFolderCommand { get; } = new DelegateCommand(() =>

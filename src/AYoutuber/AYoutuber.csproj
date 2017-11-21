@@ -179,6 +179,9 @@
     <Compile Include="Presentation\ValueConverters\MediaTypeToPlayButtonVisibilityConverter.cs" />
     <Compile Include="ViewModels\ManageSessionViewModel.cs" />
     <Compile Include="ViewModels\TimelineViewModel.cs" />
+    <Compile Include="Views\EffectWindows\BlurEffectWindow.xaml.cs">
+      <DependentUpon>BlurEffectWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FFMpegLogView.xaml.cs">
       <DependentUpon>FFMpegLogView.xaml</DependentUpon>
     </Compile>
@@ -259,6 +262,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AudioEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\EffectWindows\BlurEffectWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
