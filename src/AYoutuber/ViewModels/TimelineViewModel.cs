@@ -224,55 +224,32 @@ namespace Captura
                     File.Delete(outVideoFilePath);
                 }
 
-                // 자막 파일 존재 여부 체크
-                if (!File.Exists(this.OutVideoSubTitleFileName))
+                var videoCount = this.MediaCollection.Where(item => item.MediaType == MediaType.Video).Count();
+                var imageCount = this.MediaCollection.Where(item => item.MediaType == MediaType.Image || item.MediaType == MediaType.AnimationGIF).Count();
+                if (imageCount == 0 && videoCount == 1)
                 {
-                    // 빈 자막 파일을 만든다.
-                    using (var sw = File.CreateText(this.OutVideoSubTitleFileName))
-                    {
-                        sw.WriteLine("1");
-                        sw.WriteLine("00:00:00,000 --> 00:00:01,000");
-                        //                        sw.WriteLine(@"<SAMI>
-                        //<HEAD>
-                        //<TITLE>Result</TITLE>
-                        //<SAMIParam>
-                        //  Metrics {time:ms;}
-                        //  Spec {MSFT:1.0;}
-                        //</SAMIParam>");
-                        //                        sw.WriteLine("<STYLE TYPE=\"text / css\">");
-                        //                        sw.WriteLine(@"
-                        //<!--
-                        //  P { font-family: Arial; font-weight: normal; color: white; background-color: black; text-align: center; }
-                        //  .ENUSCC { name: English; lang: en-US ; SAMIType: CC ; }
-                        //-->
-                        //</STYLE>
-                        //</HEAD>
-                        //<BODY>
-                        //<-- Open play menu, choose Captions and Subtiles, On if available -->
-                        //<-- Open tools menu, Security, Show local captions when present -->");
-                        //                        sw.WriteLine("<SYNC Start=\"0\"><P Class=\"ENUSCC\"> 자막 </P></SYNC>");
-                        //                        sw.WriteLine("<SYNC Start=\"1000\"><P Class=\"ENUSCC\"></P></SYNC>");
-                        //                        sw.WriteLine(@"</BODY>
-                        //</SAMI>");
-                    }
+                    File.Copy(this.MediaCollection[0].MediaSource, Path.Combine(this.ResultPath, this.OutVideoFileName));
+                    MessageBox.Show("변환되었습니다.");
                 }
-
-                var tempOutPath = Path.Combine(this.OutPath, "Temp");
-                var outTempVideoFiles = this.ConvertImageToVideoGenerate(this.MediaCollection, tempOutPath);
-
-                FileInfo fileInfo = new FileInfo(imageSequenceFileName);
-                using (var sw = fileInfo.CreateText())
+                else
                 {
-                    foreach (var videoFile in outTempVideoFiles)
+                    var tempOutPath = Path.Combine(this.OutPath, "Temp");
+                    var outTempVideoFiles = this.ConvertImageToVideoGenerate(this.MediaCollection, tempOutPath);
+
+                    FileInfo fileInfo = new FileInfo(imageSequenceFileName);
+                    using (var sw = fileInfo.CreateText())
                     {
-                        sw.WriteLine("file '" + videoFile + "'");
+                        foreach (var videoFile in outTempVideoFiles)
+                        {
+                            sw.WriteLine("file '" + videoFile + "'");
+                        }
+                        sw.Flush();
                     }
-                    sw.Flush();
+
+                    VideoGenerate(imageSequenceFileNameArg, bgmNameArg, outVideoFilePathArg, outVideoFilePath, true);
+
+                    Directory.Delete(tempOutPath, true);
                 }
-
-                VideoGenerate(imageSequenceFileNameArg, bgmNameArg, outVideoFilePathArg, outVideoFilePath, true);
-
-                Directory.Delete(tempOutPath, true);
             });
 
             this.PlayMediaCommand = new DelegateCommand((obj) => {
@@ -344,7 +321,9 @@ namespace Captura
                 if (removeItem != null)
                 {
                     if (!Directory.Exists(this.RemovePath)) Directory.CreateDirectory(this.RemovePath);
-                    File.Move(removeItem.MediaSource, Path.Combine(this.RemovePath, Path.GetFileName(removeItem.MediaSource)));
+                    var removePath = Path.Combine(this.RemovePath, Path.GetFileName(removeItem.MediaSource));
+                    if (File.Exists(removePath)) File.Delete(removePath);
+                    File.Move(removeItem.MediaSource, removePath);
 
                     this.MediaCollection.Remove(removeItem);
                 }
@@ -355,6 +334,39 @@ namespace Captura
                 var outVideoPath = Path.Combine(this.ResultPath, this.OutVideoFileName);
                 if (File.Exists(outVideoPath))
                 {
+                    // 자막 파일 존재 여부 체크
+                    if (!File.Exists(this.OutVideoSubTitleFileName))
+                    {
+                        // 빈 자막 파일을 만든다.
+                        using (var sw = File.CreateText(this.OutVideoSubTitleFileName))
+                        {
+                            sw.WriteLine("1");
+                            sw.WriteLine("00:00:00,000 --> 00:00:01,000");
+                            //                        sw.WriteLine(@"<SAMI>
+                            //<HEAD>
+                            //<TITLE>Result</TITLE>
+                            //<SAMIParam>
+                            //  Metrics {time:ms;}
+                            //  Spec {MSFT:1.0;}
+                            //</SAMIParam>");
+                            //                        sw.WriteLine("<STYLE TYPE=\"text / css\">");
+                            //                        sw.WriteLine(@"
+                            //<!--
+                            //  P { font-family: Arial; font-weight: normal; color: white; background-color: black; text-align: center; }
+                            //  .ENUSCC { name: English; lang: en-US ; SAMIType: CC ; }
+                            //-->
+                            //</STYLE>
+                            //</HEAD>
+                            //<BODY>
+                            //<-- Open play menu, choose Captions and Subtiles, On if available -->
+                            //<-- Open tools menu, Security, Show local captions when present -->");
+                            //                        sw.WriteLine("<SYNC Start=\"0\"><P Class=\"ENUSCC\"> 자막 </P></SYNC>");
+                            //                        sw.WriteLine("<SYNC Start=\"1000\"><P Class=\"ENUSCC\"></P></SYNC>");
+                            //                        sw.WriteLine(@"</BODY>
+                            //</SAMI>");
+                        }
+                    }
+
                     var arguments = string.Format("{0} {1} {2}", Path.Combine(this.ResultPath, this.OutVideoSubTitleFileName), outVideoPath, "ko-KR");
                     var workingDirectory = Path.Combine(this.ApplicationBaseDirectory);
                     var processStartInfo = new ProcessStartInfo(Path.Combine(workingDirectory, "SubtitleEdit", "SubtitleEdit.exe"))
@@ -510,7 +522,7 @@ namespace Captura
             }
             Directory.CreateDirectory(tempOutPath);
 
-            int tempIndex = 0;
+            var tempIndex = 0;
             foreach (var source in sources)
             {
                 tempIndex++;
