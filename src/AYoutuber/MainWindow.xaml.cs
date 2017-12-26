@@ -68,6 +68,8 @@ namespace Captura
                 if (ServiceProvider.Messenger.ShowYesNo("New Work?", "New Work"))
                 {
                     Settings.Instance.LastWorkNumber++;
+                    mainViewModel.WorkViewModel.SelectedWorkNumber = Settings.Instance.LastWorkNumber;
+                    mainViewModel.WorkViewModel.WorkNumbers.Add(Settings.Instance.LastWorkNumber);
                     Settings.Instance.CurrentWorkNumber = Settings.Instance.LastWorkNumber;
                 }
             });

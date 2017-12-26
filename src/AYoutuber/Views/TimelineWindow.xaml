@@ -37,8 +37,8 @@
             <Button Margin="10,0,0,0" Content="▶" Command="{Binding BGMPlayStartCommand}"></Button>
             <Button Margin="10,0,0,0" Content="■" Command="{Binding BGMPlayStopCommand}" IsEnabled="{Binding IsPlaying, Mode=TwoWay}"></Button>
         </StackPanel>
-        <DataGrid x:Name="grid"  Grid.Column="1" HorizontalAlignment="Left" Margin="0,0,0,0" Grid.Row="2" VerticalAlignment="Top" ItemsSource="{Binding MediaCollection}" AutoGenerateColumns="False" AllowDrop="True"
-                  dd:DragDrop.DropScrollingMode="VerticalOnly" MinHeight="200"
+        <DataGrid x:Name="grid"  Grid.Column="1" Margin="0,0,0,0" Grid.Row="2" ItemsSource="{Binding MediaCollection}" AutoGenerateColumns="False" AllowDrop="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                  dd:DragDrop.DropScrollingMode="VerticalOnly" 
                   dd:DragDrop.IsDragSource="True"
                   dd:DragDrop.IsDropTarget="True"
                   dd:DragDrop.UseDefaultEffectDataTemplate="True"

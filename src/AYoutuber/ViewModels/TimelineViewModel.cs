@@ -203,6 +203,9 @@ namespace Captura
                 }
             }
 
+            // 빈 자막 파일 만들기
+            this.CreateEmptySubTitle();
+
             this.MediaTargetSizes = new ObservableCollection<string>(Enum.GetNames(typeof(RegionSize)));
 
             this.BGMPlayFileList = new ObservableCollection<string>(Directory.GetFiles(this.BGMDirectory, "*.mp3", SearchOption.AllDirectories).Select(str => Path.GetFileName(str)));
@@ -334,38 +337,7 @@ namespace Captura
                 var outVideoPath = Path.Combine(this.ResultPath, this.OutVideoFileName);
                 if (File.Exists(outVideoPath))
                 {
-                    // 자막 파일 존재 여부 체크
-                    if (!File.Exists(this.OutVideoSubTitleFileName))
-                    {
-                        // 빈 자막 파일을 만든다.
-                        using (var sw = File.CreateText(this.OutVideoSubTitleFileName))
-                        {
-                            sw.WriteLine("1");
-                            sw.WriteLine("00:00:00,000 --> 00:00:01,000");
-                            //                        sw.WriteLine(@"<SAMI>
-                            //<HEAD>
-                            //<TITLE>Result</TITLE>
-                            //<SAMIParam>
-                            //  Metrics {time:ms;}
-                            //  Spec {MSFT:1.0;}
-                            //</SAMIParam>");
-                            //                        sw.WriteLine("<STYLE TYPE=\"text / css\">");
-                            //                        sw.WriteLine(@"
-                            //<!--
-                            //  P { font-family: Arial; font-weight: normal; color: white; background-color: black; text-align: center; }
-                            //  .ENUSCC { name: English; lang: en-US ; SAMIType: CC ; }
-                            //-->
-                            //</STYLE>
-                            //</HEAD>
-                            //<BODY>
-                            //<-- Open play menu, choose Captions and Subtiles, On if available -->
-                            //<-- Open tools menu, Security, Show local captions when present -->");
-                            //                        sw.WriteLine("<SYNC Start=\"0\"><P Class=\"ENUSCC\"> 자막 </P></SYNC>");
-                            //                        sw.WriteLine("<SYNC Start=\"1000\"><P Class=\"ENUSCC\"></P></SYNC>");
-                            //                        sw.WriteLine(@"</BODY>
-                            //</SAMI>");
-                        }
-                    }
+                    this.CreateEmptySubTitle();
 
                     var arguments = string.Format("{0} {1} {2}", Path.Combine(this.ResultPath, this.OutVideoSubTitleFileName), outVideoPath, "ko-KR");
                     var workingDirectory = Path.Combine(this.ApplicationBaseDirectory);
@@ -399,6 +371,42 @@ namespace Captura
             this.NextCommand = new DelegateCommand(() => {
                 ModernDialog.ShowMessage("NextCommand", "title", MessageBoxButton.OK);
             });
+        }
+
+        private void CreateEmptySubTitle()
+        {
+            // 자막 파일 존재 여부 체크
+            if (!File.Exists(this.OutVideoSubTitleFileName))
+            {
+                // 빈 자막 파일을 만든다.
+                using (var sw = File.CreateText(this.OutVideoSubTitleFileName))
+                {
+                    sw.WriteLine("1");
+                    sw.WriteLine("00:00:00,000 --> 00:00:01,000");
+                    //                        sw.WriteLine(@"<SAMI>
+                    //<HEAD>
+                    //<TITLE>Result</TITLE>
+                    //<SAMIParam>
+                    //  Metrics {time:ms;}
+                    //  Spec {MSFT:1.0;}
+                    //</SAMIParam>");
+                    //                        sw.WriteLine("<STYLE TYPE=\"text / css\">");
+                    //                        sw.WriteLine(@"
+                    //<!--
+                    //  P { font-family: Arial; font-weight: normal; color: white; background-color: black; text-align: center; }
+                    //  .ENUSCC { name: English; lang: en-US ; SAMIType: CC ; }
+                    //-->
+                    //</STYLE>
+                    //</HEAD>
+                    //<BODY>
+                    //<-- Open play menu, choose Captions and Subtiles, On if available -->
+                    //<-- Open tools menu, Security, Show local captions when present -->");
+                    //                        sw.WriteLine("<SYNC Start=\"0\"><P Class=\"ENUSCC\"> 자막 </P></SYNC>");
+                    //                        sw.WriteLine("<SYNC Start=\"1000\"><P Class=\"ENUSCC\"></P></SYNC>");
+                    //                        sw.WriteLine(@"</BODY>
+                    //</SAMI>");
+                }
+            }
         }
 
         /// <summary>
